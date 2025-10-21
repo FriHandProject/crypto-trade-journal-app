@@ -38,75 +38,54 @@ import {
 const staticData = {
   navMain: [
     {
+      title: "Trading Journal",
+      url: "/dashboard",
+      icon: IconChartBar,
+      isActive: true,
+    },
+    {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
       title: "Analytics",
-      url: "#",
+      url: "/dashboard",
       icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
     },
   ],
   navClouds: [
     {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
+      title: "Trade History",
+      icon: IconListDetails,
+      url: "/dashboard",
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
+          title: "All Trades",
+          url: "/dashboard",
         },
         {
-          title: "Archived",
-          url: "#",
+          title: "Winning Trades",
+          url: "/dashboard",
+        },
+        {
+          title: "Losing Trades",
+          url: "/dashboard",
         },
       ],
     },
     {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
+      title: "Reports",
+      icon: IconReport,
+      url: "/dashboard",
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
+          title: "Performance Summary",
+          url: "/dashboard",
         },
         {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
+          title: "Export Data",
+          url: "/dashboard",
         },
       ],
     },

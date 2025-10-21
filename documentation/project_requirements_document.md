@@ -1,117 +1,131 @@
-# Project Requirements Document: codeguide-starter
-
----
+# Project Requirements Document (PRD)
 
 ## 1. Project Overview
 
-The **codeguide-starter** project is a boilerplate web application that provides a ready-made foundation for any web project requiring secure user authentication and a post-login dashboard. It sets up the common building blocks—sign-up and sign-in pages, API routes to handle registration and login, and a simple dashboard interface driven by static data. By delivering this skeleton, it accelerates development time and ensures best practices are in place from day one.
+This mobile-first Crypto Trade Journal App is designed to help individual traders securely record, track, and analyze their cryptocurrency trades in one place. It provides a private, password-protected dashboard where users can log details like trading pair, entry/exit prices, P/L (profit and loss), attach screenshots of trade confirmations, and view performance charts over time. By replacing scattered spreadsheets and screenshots in your phone’s gallery, the app centralizes your trading history and delivers insights into your win/loss ratio, total trades, and net profitability.
 
-This starter kit is being built to solve the friction developers face when setting up repeated common tasks: credential handling, session management, page routing, and theming. Key objectives include: 1) delivering a fully working authentication flow (registration & login), 2) providing a gated dashboard area upon successful login, 3) establishing a clear, maintainable project structure using Next.js and TypeScript, and 4) demonstrating a clean theming approach with global and section-specific CSS. Success is measured by having an end-to-end login journey in under 200 lines of code and zero runtime type errors.
-
----
+The app is being built to streamline the habit of journaling trades—one of the best ways to learn from your successes and mistakes. Key objectives include:  
+1. Strong security so each user’s data stays private.  
+2. An intuitive, mobile-friendly interface that makes logging trades painless.  
+3. Reliable screenshot uploads with cloud storage.  
+4. Accurate analytics and charts that update in real time.  
+5. A solid, extensible codebase so future features (like OCR or mobile apps) can be added without major rewrites.
 
 ## 2. In-Scope vs. Out-of-Scope
 
-### In-Scope (Version 1)
-- User registration (sign-up) form with validation
-- User login (sign-in) form with validation
-- Next.js API routes under `/api/auth/route.ts` handling:
-  - Credential validation
-  - Password hashing (e.g., bcrypt)
-  - Session creation or JWT issuance
-- Protected dashboard pages under `/dashboard`:
-  - `layout.tsx` wrapping dashboard content
-  - `page.tsx` rendering static data from `data.json`
-- Global application layout in `/app/layout.tsx`
-- Basic styling via `globals.css` and `dashboard/theme.css`
-- TypeScript strict mode enabled
+**In-Scope (v1.0)**
+- **User Authentication**: Email/password sign-up and sign-in using `better-auth` with secure session management.  
+- **Protected Dashboard**: Only authenticated users can access their personal dashboard.  
+- **Trade Data Model**: Drizzle ORM schema for a `trades` table (fields: `userId`, `date`, `tradingPair`, `entryPrice`, `exitPrice`, `pnl`, `screenshotUrl`).  
+- **API Endpoints**:  
+  - `POST /api/trades`: Create a new trade.  
+  - `GET /api/trades`: Fetch logged-in user’s trades.  
+  - `POST /api/upload`: Upload screenshot to cloud storage (e.g., Vercel Blob or AWS S3) and return public URL.  
+- **Frontend UI**: Dashboard page with  
+  - A table or list of past trades.  
+  - “Add Trade” button opening a modal form.  
+  - Performance summary cards and charts using a library like Recharts.  
+- **Image Storage**: Integration with Vercel Blob (or AWS S3) for storing screenshots.  
+- **Development Environment**: Docker + Docker Compose to run Next.js and PostgreSQL locally.
 
-### Out-of-Scope (Later Phases)
-- Integration with a real database (PostgreSQL, MongoDB, etc.)
-- Advanced authentication flows (password reset, email verification, MFA)
-- Role-based access control (RBAC)
-- Multi-tenant or white-label theming
-- Unit, integration, or end-to-end testing suites
-- CI/CD pipeline and production deployment scripts
-
----
+**Out-of-Scope (Phase 2+)**
+- OCR-based automatic extraction of trade data from screenshots.  
+- Native mobile applications (iOS/Android).  
+- Real-time data feeds or trading execution.  
+- CSV export, social sharing, or public profiles.  
+- Multi-currency conversions or fiat integrations.  
+- Advanced AI-powered trading suggestions.
 
 ## 3. User Flow
 
-A new visitor lands on the root URL and sees a welcome page with options to **Sign Up** or **Sign In**. If they choose Sign Up, they fill in their email, password, and hit “Create Account.” The form submits to `/api/auth/route.ts`, which hashes the password, creates a new user session or token, and redirects them to the dashboard. If any input is invalid, an inline error message explains the issue (e.g., “Password too short”).
+When a new user arrives, they land on a welcome/login page where they can sign up with an email and password or log in if they already have an account. Upon successful authentication, the user is automatically redirected to their personal dashboard. This redirect happens client-side in Next.js (App Router) after `better-auth` verifies the session.
 
-Once authenticated, the user is taken to the `/dashboard` route. Here they see a sidebar or header defined by `dashboard/layout.tsx`, and the main panel pulls in static data from `data.json`. They can log out (if that control is present), but otherwise their entire session is managed by server-side cookies or tokens. Returning users go directly to Sign In, submit credentials, and upon success they land back on `/dashboard`. Any unauthorized access to `/dashboard` redirects back to Sign In.
-
----
+On the dashboard, the user sees a summary section (total trades, win/loss ratio, net P/L) at the top and a table or list of individual trade entries below. To record a new trade, they click the “Add Trade” button, which opens a modal form. The form collects date, trading pair, entry price, exit price, P/L (optional or calculated), and lets the user choose an image file. When the user hits “Save,” the app first uploads the image to `/api/upload`, receives its URL, then submits the trade data via `/api/trades`. After the server confirms the save, the client re-fetches the user’s trades and updates both the table and the summary charts.
 
 ## 4. Core Features
 
-- **Sign-Up Page (`/app/sign-up/page.tsx`)**: Form fields for email & password, client-side validation, POST to `/api/auth`.
-- **Sign-In Page (`/app/sign-in/page.tsx`)**: Form fields for email & password, client-side validation, POST to `/api/auth`.
-- **Authentication API (`/app/api/auth/route.ts`)**: Handles both registration and login based on HTTP method, integrates password hashing (bcrypt) and session or JWT logic.
-- **Global Layout (`/app/layout.tsx` + `globals.css`)**: Shared header, footer, and CSS resets across all pages.
-- **Dashboard Layout (`/app/dashboard/layout.tsx` + `dashboard/theme.css`)**: Sidebar or top nav for authenticated flows, section-specific styling.
-- **Dashboard Page (`/app/dashboard/page.tsx`)**: Reads `data.json`, renders it as cards or tables.
-- **Static Data Source (`/app/dashboard/data.json`)**: Example dataset to demo dynamic rendering.
-- **TypeScript Configuration**: `tsconfig.json` with strict mode and path aliases (if any).
-
----
+- **Authentication**  
+  - Secure sign-up/sign-in with email and password.  
+  - Session tokens and password hashing handled by `better-auth`.
+- **Protected Dashboard**  
+  - Route guard to ensure only logged-in users access `/dashboard`.
+- **Trade Entry & Management**  
+  - Add, view, and list trades with fields: date, pair, entry/exit price, P/L.  
+  - Edit/Delete functionality (optional for v1).
+- **Screenshot Upload**  
+  - File picker in form.  
+  - `/api/upload` endpoint to store images in cloud storage.  
+- **Performance Analytics**  
+  - Calculation of key metrics (total trades, win/loss ratio, net P/L).  
+  - Charts for profit over time (using Recharts or similar).
+- **API Layer**  
+  - Next.js API Routes under `/app/api/` for trade and upload endpoints.  
+  - Input validation, authentication checks.
+- **Database Schema**  
+  - `trades` table defined via Drizzle ORM.  
+  - Foreign key relationship to `users` table.
+- **Dev Environment**  
+  - Docker Compose config spinning up Next.js server + PostgreSQL.
+- **UI Library**  
+  - `shadcn/ui` (Radix UI + Tailwind CSS) for accessible, customizable components.
 
 ## 5. Tech Stack & Tools
 
-- **Framework**: Next.js (App Router) for file-based routing, SSR/SSG, and API routes.
-- **Language**: TypeScript for type safety.
-- **UI Library**: React 18 for component-based UI.
-- **Styling**: Plain CSS via `globals.css` (global reset) and `theme.css` (sectional styling). Can easily migrate to CSS Modules or Tailwind in the future.
-- **Backend**: Node.js runtime provided by Next.js API routes.
-- **Password Hashing**: bcrypt (npm package).
-- **Session/JWT**: NextAuth.js or custom JWT logic (to be decided in implementation).
-- **IDE & Dev Tools**: VS Code with ESLint, Prettier extensions. Optionally, Cursor.ai for AI-assisted coding.
-
----
+- **Frontend**  
+  - Next.js (App Router) + React  
+  - TypeScript for type safety  
+  - shadcn/ui (Radix UI + Tailwind CSS)  
+  - Recharts (or similar) for charts
+- **Backend**  
+  - Next.js API Routes  
+  - `better-auth` for authentication
+- **Database**  
+  - PostgreSQL  
+  - Drizzle ORM (type-safe schema definitions)
+- **Storage**  
+  - Vercel Blob (preferred) or AWS S3 for screenshots
+- **Containerization**  
+  - Docker & Docker Compose
+- **Testing (Recommendations)**  
+  - Playwright or Cypress for end-to-end flows  
+  - Jest/React Testing Library for unit tests
 
 ## 6. Non-Functional Requirements
 
-- **Performance**: Initial page load under 200 ms on a standard broadband connection. API responses under 300 ms.
-- **Security**:
-  - HTTPS only in production.
-  - Proper CORS, CSRF protection for API routes.
-  - Secure password storage (bcrypt with salt).
-  - No credentials or secrets checked into version control.
-- **Scalability**: Structure must support adding database integration, caching layers, and advanced auth flows without rewiring core app.
-- **Usability**: Forms should give real-time feedback on invalid input. Layout must be responsive (mobile > 320 px).
-- **Maintainability**: Code must adhere to TypeScript strict mode. Linting & formatting enforced by ESLint/Prettier.
-
----
+- **Performance**  
+  - Dashboard page should load in under 2 seconds on a 4G connection.  
+  - `GET /api/trades` responses under 200ms; `POST` under 500ms (excluding file upload time).
+- **Security**  
+  - All traffic over HTTPS.  
+  - Passwords hashed with a modern algorithm (e.g., bcrypt).  
+  - CSRF protection on form submissions.  
+  - Sanitization of all user inputs to prevent XSS/SQL injection.
+- **Usability & Accessibility**  
+  - Mobile-first, responsive design.  
+  - All interactive elements keyboard-navigable, ARIA attributes for screen readers.
+- **Scalability**  
+  - Support at least 1,000 concurrent users in the first year.  
+  - Database indexes on userId and date fields for fast queries.
+- **Reliability**  
+  - 99.9% uptime in production.  
+  - Graceful error handling with user-friendly messages.
 
 ## 7. Constraints & Assumptions
 
-- **No Database**: Dashboard uses only `data.json`; real database integration is deferred.
-- **Node Version**: Requires Node.js >= 14.
-- **Next.js Version**: Built on Next.js 13+ App Router.
-- **Authentication**: Assumes availability of bcrypt or NextAuth.js at implementation time.
-- **Hosting**: Targets serverless or Node.js-capable hosting (e.g., Vercel, Netlify).
-- **Browser Support**: Modern evergreen browsers; no IE11 support required.
-
----
+- The project will be deployed on Vercel, leveraging Vercel Blob for storage.  
+- PostgreSQL is provisioned either via Docker Compose (dev) or a managed service (prod).  
+- Drizzle ORM migrations (`drizzle-kit`) must be run whenever schema changes.  
+- No real-time WebSocket communication is needed in v1.  
+- Assume the user has a modern browser (Chrome, Safari, Firefox) with JavaScript enabled.
 
 ## 8. Known Issues & Potential Pitfalls
 
-- **Static Data Limitation**: `data.json` is only for demo. A real API or database will be needed to avoid stale data.
-  *Mitigation*: Define a clear interface for data fetching so swapping to a live endpoint is trivial.
-
-- **Global CSS Conflicts**: Using global styles can lead to unintended overrides.
-  *Mitigation*: Plan to migrate to CSS Modules or utility-first CSS in Phase 2.
-
-- **API Route Ambiguity**: Single `/api/auth/route.ts` handling both sign-up and sign-in could get complex.
-  *Mitigation*: Clearly branch on HTTP method (`POST /register` vs. `POST /login`) or split into separate files.
-
-- **Lack of Testing**: No test suite means regressions can slip in.
-  *Mitigation*: Build a minimal Jest + React Testing Library setup in an early iteration.
-
-- **Error Handling Gaps**: Client and server must handle edge cases (network failures, malformed input).
-  *Mitigation*: Define a standard error response schema and show user-friendly messages.
+- **Large Image Uploads**: Uploading multi-megabyte screenshots can be slow or hit size limits. Mitigation: implement client-side image compression and enforce a max file size (e.g., 5 MB).
+- **API Rate Limits**: If using a third-party storage service, watch for rate limits on upload endpoints. Consider exponential backoff and retry logic.
+- **Database Migration Conflicts**: If multiple branches define new Drizzle schemas, conflicts may arise. Mitigation: adopt a clear migration versioning strategy.
+- **Error Handling Complexity**: Multi-step form submission (upload then data save) can fail mid-process. Mitigation: implement transactional cleanup or rollback of orphaned uploads.
+- **CORS & Security Headers**: Ensure CORS is configured correctly on API routes and that security headers (Content-Security-Policy) are in place.
 
 ---
 
-This PRD should serve as the single source of truth for the AI model or any developer generating the next set of technical documents: Tech Stack Doc, Frontend Guidelines, Backend Structure, App Flow, File Structure, and IDE Rules. It contains all functional and non-functional requirements with no ambiguity, enabling seamless downstream development.
+This PRD serves as the single source of truth for all subsequent technical documentation: tech stack choices, frontend guidelines, backend architecture, database schema, file structure, and IDE-specific rules. All details here are explicitly defined to eliminate guesswork and ensure the AI model can generate consistent, accurate code artifacts.

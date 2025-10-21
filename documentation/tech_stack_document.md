@@ -1,90 +1,131 @@
-# Tech Stack Document
+# Tech Stack Document for Crypto Trade Journal App
 
-This document explains the key technologies chosen for the **codeguide-starter** project. It’s written in everyday language so anyone—technical or not—can understand why each tool was picked and how it supports the application.
+This document explains, in everyday language, the technology choices behind the **crypto-trade-journal-app**. You’ll see why each tool or library was picked and how they come together to create a secure, high-performance trading journal.
 
 ## 1. Frontend Technologies
-The frontend is everything the user sees and interacts with. For this project, we’ve used:
+
+The frontend is everything your users see and interact with in their browsers. We chose modern tools to make development fast, the UI responsive, and the code easy to maintain.
 
 - **Next.js (App Router)**
-  - A React framework that makes page routing, server-side rendering, and API routes very simple.
-  - Enhances user experience by pre-rendering pages on the server or at build time, leading to faster initial load.
-- **React 18**
-  - The underlying library for building user interfaces with reusable components.
-  - Provides a smooth, interactive experience thanks to its virtual DOM and modern hooks.
+  - A React-based framework that lets us build pages and APIs in the same project.
+  - Supports server-side rendering (SSR) and static site generation (SSG) for fast page loads and excellent SEO.
+- **React**
+  - The core library for building interactive user interfaces.
+  - We use React’s built-in hooks (`useState`, `useEffect`, etc.) to manage form state and UI updates.
 - **TypeScript**
-  - A superset of JavaScript that adds types (labels for data).
-  - Helps catch errors early during development and makes the code easier to maintain.
-- **CSS (globals.css & theme.css)**
-  - **globals.css** applies base styles (fonts, colors, resets) across the entire app.
-  - **dashboard/theme.css** defines the look and feel specific to the dashboard area.
-  - This separation keeps styles organized and avoids accidental style conflicts.
+  - Adds type safety to JavaScript, catching errors early in development.
+  - Essential when working with financial data, ensuring numbers and objects are handled correctly.
+- **shadcn/ui** (built on Radix UI + Tailwind CSS)
+  - A set of ready-made, accessible UI components: buttons, cards, tables, dialogs, forms.
+  - Highly customizable through Tailwind classes.
+- **Tailwind CSS**
+  - A utility-first styling framework that speeds up writing and maintaining styles.
+  - Promotes a mobile-first, responsive design approach out of the box.
+- **React Context for Authentication**
+  - A simple way to share the user’s login status across all components.
+  - Keeps UI in sync with whether someone is signed in or not.
 
-By combining these tools, we have a clear structure (Next.js folders for pages and layouts), safer code (TypeScript), and flexible styling with vanilla CSS.
+How it enhances user experience:
+- Consistent, responsive design on any device (mobile or desktop).
+- Fast loading pages thanks to Next.js optimizations.
+- Clear, well-tested UI components ensure accessibility and usability.
 
 ## 2. Backend Technologies
-The backend handles data, user accounts, and the logic behind the scenes. Our choices here are:
+
+The backend powers data storage, business logic, and secure access. Here’s what we picked to make it reliable and maintainable.
 
 - **Next.js API Routes**
-  - Allows us to write server-side code (`route.ts` files) alongside our frontend in the same project.
-  - Runs on Node.js, so we can handle requests like sign-up, sign-in, and data fetching in one place.
-- **Node.js Runtime**
-  - The JavaScript environment on the server that executes our API routes.
-- **bcrypt** (npm package)
-  - A library for hashing passwords securely before storing them.
-  - Ensures that even if someone got access to our data, raw passwords aren’t visible.
-- **(Optional) NextAuth.js or JWT**
-  - While this starter kit shows a custom authentication flow, it can easily integrate services like NextAuth.js for email-based login or JWT (JSON Web Tokens) for stateless sessions.
+  - Lets us write RESTful endpoints (e.g., `/api/trades`, `/api/upload`) next to our frontend code.
+  - Simplifies deployment since both frontend and backend live in one codebase.
+- **better-auth**
+  - A ready-made authentication solution that handles sign-up, sign-in, password hashing, sessions, and secure token storage.
+  - Ensures your journal is private to each user.
+- **PostgreSQL**
+  - A battle-tested relational database for storing structured trade data.
+  - Scales well as your user base grows.
+- **Drizzle ORM**
+  - A type-safe, lightweight ORM for defining and querying your database schema in TypeScript.
+  - Helps prevent data bugs and keeps your database schema in sync with your code.
+- **API Endpoints**
+  - `/api/trades` (GET & POST): Fetches all trades for a user, creates new trade entries.
+  - `/api/upload` (POST): Handles screenshot uploads to cloud storage and returns a public URL.
 
-These components work together to receive user credentials, verify or store them securely, manage sessions or tokens, and deliver protected data back to the frontend.
+How it supports functionality:
+- Secure user login and session management.
+- Structured storage of trades with fields like date, pair, entry/exit prices, P/L, and screenshot URL.
+- Clean separation between data handling (API routes) and UI.
 
 ## 3. Infrastructure and Deployment
-Infrastructure covers where and how we host the app, as well as how changes get delivered:
 
-- **Git & GitHub**
-  - Version control system (Git) and remote hosting (GitHub) keep track of all code changes and allow team collaboration.
-- **Vercel (or Netlify)**
-  - A popular hosting service optimized for Next.js, with one-click deployments and global content delivery.
-  - Automatically rebuilds and deploys the site whenever code is pushed to the main branch.
-- **GitHub Actions (CI/CD)**
-  - Automates tasks like linting (ESLint), formatting (Prettier), and running any tests you add.
-  - Ensures that only clean, tested code goes live.
+These choices determine how the app runs in development and production, ensuring reliability and easy updates.
 
-Together, these tools provide a reliable, scalable setup where every code change is tested and deployed quickly, with minimal manual work.
+- **Version Control: Git & GitHub**
+  - All code lives in a GitHub repository for tracking changes and team collaboration.
+- **Containerization: Docker & Docker Compose**
+  - Spins up a local PostgreSQL database and Next.js server with one command.
+  - Guarantees that everyone on the team uses the same development environment.
+- **Hosting Platform: Vercel**
+  - Ideal for Next.js apps; provides automatic builds, global CDN, and serverless function hosting.
+  - Zero-config deployments when you push to GitHub.
+- **CI/CD: GitHub Actions** (optional but recommended)
+  - Automates tests, linting, and deployment on every pull request or merge.
+  - Keeps the main branch always ready for production.
+
+How these decisions help:
+- One-click setup for new developers.
+- Quick, reliable deployments with minimal manual work.
+- Built-in scaling as traffic grows.
 
 ## 4. Third-Party Integrations
-While this starter kit is minimal by design, it already includes or can easily add:
 
-- **bcrypt**
-  - For secure password hashing (included as an npm dependency).
-- **NextAuth.js** (optional)
-  - A full-featured authentication library supporting email/password, OAuth, and more.
-- **Sentry or LogRocket** (optional)
-  - For real-time error tracking and performance monitoring in production.
+To extend functionality without reinventing the wheel, we integrate with a few key services.
 
-These integrations help extend the app’s capabilities without building every feature from scratch.
+- **Cloud Storage** (Vercel Blob or AWS S3)
+  - Stores user-uploaded screenshots securely.
+  - Returns a public URL for displaying images in the journal.
+- **Charting Library: Recharts**
+  - Renders performance graphs (e.g., profit over time, win/loss ratio) on the dashboard.
+  - Easy to customize and integrates well with React.
+- **OCR Services (Advanced Feature)**
+  - Google Cloud Vision, AWS Textract, or Tesseract.js for parsing text from screenshots.
+  - Allows automatic extraction of trade details from images, streamlining data entry.
+- **Analytics (Optional)**
+  - Google Analytics or similar to track usage patterns and improve the product over time.
+
+Benefits:
+- Saves development time by using proven external services.
+- Adds powerful features (file storage, data visualization, OCR) without heavy custom work.
 
 ## 5. Security and Performance Considerations
-We’ve baked in several measures to keep users safe and the app running smoothly:
 
-Security:
-- Passwords are never stored in plain text—bcrypt hashes them with a random salt.
-- API routes can implement CSRF protection and input validation to block malicious requests.
-- Session tokens or cookies are marked secure and HttpOnly to prevent theft via JavaScript.
+We’ve built in best practices to keep user data safe and the app running smoothly.
 
-Performance:
-- Server-side rendering (SSR) and static site generation (SSG) in Next.js deliver pages faster.
-- Code splitting and lazy-loaded components ensure users only download what they need.
-- Global CSS and theme files are small and cached by the browser for quick repeat visits.
+Security Measures:
+- Password hashing and secure sessions via **better-auth**.
+- HTTPS enforced by Vercel.
+- Fine-grained access control on API routes—only authenticated users can read or write their own trades.
+- Secure cloud storage rules to protect uploaded screenshots.
+- Input validation on both frontend and backend to prevent malformed data.
 
-These strategies work together to give users a fast, secure experience every time.
+Performance Optimizations:
+- **Next.js** page splitting and image optimization for faster load times.
+- Static asset caching on Vercel’s global CDN.
+- Database indexes on key columns (e.g., user ID, date) for faster queries.
+- Lazy loading of charts and large components.
 
 ## 6. Conclusion and Overall Tech Stack Summary
-In building **codeguide-starter**, we chose technologies that:
 
-- Align with modern web standards (Next.js, React, TypeScript).
-- Provide a clear, file-based project structure for rapid onboarding.
-- Offer built-in support for server-side rendering, API routes, and static assets.
-- Emphasize security through password hashing, session management, and safe defaults.
-- Enable easy scaling and future enhancements via modular code and optional integrations.
+Our choices align closely with the goals of a mobile-first, secure, and data-driven crypto trading journal:
 
-This stack strikes a balance between simplicity for newcomers and flexibility for experienced teams. It accelerates development of a secure authentication flow and a polished dashboard, while leaving room to plug in databases, test suites, and advanced features as the project grows.
+- Frontend built with **Next.js**, **React**, **TypeScript**, **shadcn/ui**, and **Tailwind CSS** for a fast, responsive, and accessible UI.
+- Backend powered by **Next.js API Routes**, **better-auth**, **PostgreSQL**, and **Drizzle ORM** for secure user management and reliable data storage.
+- Infrastructure on **GitHub**, **Docker**, **Vercel**, and **GitHub Actions** for seamless development, testing, and deployment.
+- Key integrations with **Vercel Blob/AWS S3**, **Recharts**, and optional **OCR** services to enhance user experience and data insights.
+- Security practices and performance tweaks to ensure smooth, safe usage.
+
+Unique Aspects:
+- An all-in-one Next.js codebase that combines frontend, backend, and hosting with minimal configuration.
+- Type-safe database interactions using Drizzle ORM and TypeScript.
+- A modern UI library (`shadcn/ui`) that speeds up design without sacrificing accessibility.
+
+With this foundation in place, you can focus on adding your own trade analytics, advanced OCR features, and personalized dashboard components—knowing the core technology is solid and scalable.
